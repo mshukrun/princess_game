@@ -1,0 +1,21 @@
+﻿<!doctype html>
+<html lang="he" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>הנסיכה הלוחמת</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin:0; height:100%; background:#120a1f; }
+  body { display:flex; align-items:center; justify-content:center; }
+  canvas { max-width:100vw; max-height:100vh; }
+  /* Phaser appends a helper canvas to the page for each right-to-left text; keep them out of the layout */
+  canvas[dir="rtl"] { position:absolute; left:-99999px; top:0; pointer-events:none; }
+</style>
+</head>
+<body>
+<script src="phaser.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
+
+
