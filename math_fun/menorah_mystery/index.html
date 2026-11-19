@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הנרות החסרים</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="hurt"></div>
+
+<div id="hud" hidden>
+  <div class="hud-top">
+    <div id="hearts"></div>
+    <div class="pill">🕯️ נרות בחנוכייה: <b id="candle-count">0</b>/8 &nbsp;|&nbsp; 🎒 בתיק: <b id="carry-count">0</b></div>
+    <div class="pill" id="compass">התיבה הקרובה: <b id="dist">–</b></div>
+    <button id="music-btn" class="small" style="margin-inline-start:0">🎵 מוזיקה (M)</button>
+    <button id="notebook-btn" class="small">📖 מחברת (N)</button>
+  </div>
+  <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="prompt" hidden></div>
+  <div id="toast" hidden></div>
+  <div id="skills"></div>
+</div>
+
+<!-- Start -->
+<div class="overlay" id="start">
+  <div class="panel wide">
+    <h1>🕎 הנרות החסרים</h1>
+    <div class="chooser">
+      <canvas id="preview" width="220" height="260"></canvas>
+      <div class="picks">
+        <p>בחרו את הדמות שלכם:</p>
+        <button type="button" class="char sel" id="pick-m">⚔️ לוחם<small>יהודה</small></button>
+        <button type="button" class="char" id="pick-f">⚔️ לוחמת<small>יהודית</small></button>
+      </div>
+    </div>
+    <p class="story" id="story" data-f="זה הלילה הראשון של חנוכה, אבל החנוכייה של הכפר חשוכה — <b>כל 8 הנרות נעלמו</b>!
+      את <b>יהודית הלוחמת</b>. בכל אחד מ-8 בתי הכפר, באחד החדרים, מוסתרת <b>תיבת אוצר</b> עם נר אחד, וכל תיבה נעולה בחידת חשבון.
+      היכנסי לבתים, פתחי את התיבות, אספי רמזים, הדפי את החיילים היווניים, החזירי את הנרות לחנוכייה וגלי <b>מי לקח אותם</b>.">
+      זה הלילה הראשון של חנוכה, אבל החנוכייה של הכפר חשוכה — <b>כל 8 הנרות נעלמו</b>!
+      אתה <b>יהודה הלוחם</b>. בכל אחד מ-8 בתי הכפר, באחד החדרים, מוסתרת <b>תיבת אוצר</b> עם נר אחד, וכל תיבה נעולה בחידת חשבון.
+      היכנס לבתים, פתח את התיבות, אסוף רמזים, הדוף את החיילים היווניים, החזר את הנרות לחנוכייה וגלה <b>מי לקח אותם</b>.
+    </p>
+    <div class="controls">
+      <div><kbd>← ↑ ↓ →</kbd> או <kbd>W A S D</kbd> — תנועה</div>
+      <div><kbd>גרירת עכבר</kbd> או <kbd>Z</kbd> <kbd>C</kbd> — סיבוב מצלמה</div>
+      <div><kbd>E</kbd> — פתיחת תיבה / הנחת נרות בחנוכייה</div>
+      <div><kbd>M</kbd> — מוזיקה (שירי חנוכה) מופעלת / כבויה</div>
+      <div><kbd>רווח</kbd> או לחיצה — ⚔️ חיתוך</div>
+      <div><kbd>Shift</kbd> 🌀 חבטה סיבובית &nbsp; <kbd>Q</kbd> 🛡️ מגן &nbsp; <kbd>R</kbd> 🔥 אור המכבים</div>
+      <div><kbd>N</kbd> — מחברת הבלש</div>
+    </div>
+    <p class="hint" data-f="החבטה הסיבובית זמינה מההתחלה, והמגן ואור המכבים נפתחים אחרי שתמצאי 2 נרות. בחדרי הבתים מוסתרות גם קופסאות ירוקות עם סופגניות מרפאות 🍩 (E כדי לפתוח).">החבטה הסיבובית זמינה מההתחלה, והמגן ואור המכבים נפתחים אחרי שתמצא 2 נרות. בחדרי הבתים מוסתרות גם קופסאות ירוקות עם סופגניות מרפאות 🍩 (E כדי לפתוח).</p>
+    <button id="start-btn" data-f="התחילי את ההרפתקה">התחל את ההרפתקה</button>
+  </div>
+</div>
+
+<!-- Puzzle / clue -->
+<div class="overlay" id="puzzle" hidden>
+  <div class="panel">
+    <h2 id="puzzle-title">מנעול התיבה</h2>
+    <div id="puzzle-body">
+      <p class="q" id="puzzle-q"></p>
+      <form id="puzzle-form">
+        <input id="puzzle-input" type="number" inputmode="numeric" autocomplete="off" required>
+        <button type="submit" data-f="פתחי">פתח</button>
+      </form>
+      <p id="puzzle-fb" class="fb"></p>
+      <button class="small ghost" id="puzzle-cancel" data-f="עזבי (Esc)">עזוב (Esc)</button>
+    </div>
+    <div id="clue-body" hidden>
+      <p class="fb ok" id="clue-candle"></p>
+      <p class="clue" id="clue-text"></p>
+      <button id="clue-continue" data-f="המשיכי (רווח)">המשך (רווח)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notebook -->
+<div class="overlay" id="notebook" hidden>
+  <div class="panel wide">
+    <h2>📖 מחברת הבלש</h2>
+    <h3>חשודים</h3>
+    <div class="suspects" id="nb-suspects"></div>
+    <h3>רמזים</h3>
+    <ol id="nb-clues"></ol>
+    <button id="notebook-close">סגור (N)</button>
+  </div>
+</div>
+
+<!-- Accuse -->
+<div class="overlay" id="accuse" hidden>
+  <div class="panel wide">
+    <h2>מי לקח את הנרות?</h2>
+    <p data-f="החזרת את כל הנרות וגילית את כל הרמזים. קראי את המחברת והאשימי את הגנב!">החזרת את כל הנרות וגילית את כל הרמזים. קרא את המחברת והאשם את הגנב!</p>
+    <ol id="accuse-clues"></ol>
+    <div class="suspects" id="accuse-suspects"></div>
+    <p id="accuse-fb" class="fb"></p>
+    <button class="small ghost" id="accuse-cancel">עוד לא</button>
+  </div>
+</div>
+
+<!-- End -->
+<div class="overlay" id="win" hidden>
+  <div class="panel wide">
+    <h1>🕎 חג חנוכה שמח! 🕎</h1>
+    <p class="story" id="win-text"></p>
+    <button id="again-btn" data-f="שחקי שוב">שחק שוב</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
